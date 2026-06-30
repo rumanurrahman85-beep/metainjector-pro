@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaInjector Pro — Professional SVG Metadata Studio</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a25;
+            --bg-hover: #252535;
+            --border: #2a2a3a;
+            --border-hover: #3a3a50;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6a6a80;
+            --accent-cyan: #00f0ff;
+            --accent-purple: #b829f7;
+            --accent-green: #00ff88;
+            --accent-pink: #ff2d7d;
+            --accent-orange: #ffaa00;
+            --gradient-primary: linear-gradient(135deg, #00f0ff 0%, #b829f7 100%);
+            --gradient-success: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            --gradient-warn: linear-gradient(135deg, #ffaa00 0%, #ff8800 100%);
+            --shadow-glow: 0 0 20px rgba(0, 240, 255, 0.15);
+            --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+        /* Header */
+        .header {
+            background: linear-gradient(180deg, rgba(0,240,255,0.05) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 40px 20px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 600px; height: 2px;
+            background: var(--gradient-primary);
+            box-shadow: 0 0 30px rgba(0,240,255,0.3);
+        }
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-top: 8px;
+        }
+        .header .badges {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+        .badge-cyan { background: rgba(0,240,255,0.1); border-color: rgba(0,240,255,0.3); color: var(--accent-cyan); }
+        .badge-purple { background: rgba(184,41,247,0.1); border-color: rgba(184,41,247,0.3); color: var(--accent-purple); }
+        .badge-green { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3); color: var(--accent-green); }
+
+        /* Container */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px; }
+
+        /* Panel */
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-card);
+            transition: border-color 0.3s;
+        }
+        .panel:hover { border-color: var(--border-hover); }
+        .panel-title {
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .panel-title .icon { font-size: 1.3rem; }
+
+        /* Upload Tabs */
+        .upload-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .upload-tab {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .upload-tab:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-primary);
+        }
+        .upload-tab.active {
+            background: linear-gradient(135deg, rgba(0,240,255,0.1), rgba(184,41,247,0.1));
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 60px 30px;
+            text-align: center;
+            cursor: pointer;
+            background: var(--bg-secondary);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(0,240,255,0.03) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent-cyan);
+            background: linear-gradient(135deg, rgba(0,240,255,0.05), rgba(184,41,247,0.05));
+        }
+        .drop-zone:hover::before, .drop-zone.dragover::before { opacity: 1; }
+        .drop-zone .dz-icon { font-size: 3.5rem; margin-bottom: 16px; display: block; }
+        .drop-zone .dz-title { color: var(--text-primary); font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        .drop-zone .dz-sub { color: var(--text-muted); font-size: 0.85rem; }
+        input[type="file"] { display: none; }
+
+        /* File Grid */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .file-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        .file-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+        .file-card .thumb {
+            width: 100%; height: 140px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-primary);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+        .file-card .thumb svg { max-width: 90%; max-height: 90%; }
+        .file-card .thumb img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        .file-card .name { font-weight: 600; color: var(--text-primary); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-card .meta { color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; }
+        .file-card .status {
+            position: absolute; top: 10px; right: 10px;
+            padding: 3px 10px; border-radius: 12px;
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-pending { background: rgba(255,170,0,0.15); color: var(--accent-orange); border: 1px solid rgba(255,170,0,0.3); }
+        .status-ai { background: rgba(0,240,255,0.15); color: var(--accent-cyan); border: 1px solid rgba(0,240,255,0.3); }
+        .status-rule { background: rgba(184,41,247,0.15); color: var(--accent-purple); border: 1px solid rgba(184,41,247,0.3); }
+        .status-done { background: rgba(0,255,136,0.15); color: var(--accent-green); border: 1px solid rgba(0,255,136,0.3); }
+        .status-error { background: rgba(255,45,125,0.15); color: var(--accent-pink); border: 1px solid rgba(255,45,125,0.3); }
+
+        /* Form Elements */
+        label { display: block; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        select, input[type="text"], textarea {
+            width: 100%; padding: 12px 16px; border-radius: var(--radius-sm);
+            border: 1px solid var(--border); background: var(--bg-primary);
+            color: var(--text-primary); font-size: 0.95rem; font-family: inherit;
+            transition: all 0.3s;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none; border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0,240,255,0.1);
+        }
+        textarea { min-height: 80px; resize: vertical; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+        @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+        .field-group { margin-bottom: 16px; }
+        .char-count { float: right; color: var(--text-muted); font-size: 0.8rem; font-weight: 500; }
+        .char-count.warn { color: var(--accent-orange); }
+        .char-count.danger { color: var(--accent-pink); }
+
+        /* Platform Chips */
+        .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .chip {
+            padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; background: var(--bg-primary); color: var(--text-muted);
+            border: 1px solid var(--border); transition: all 0.3s;
+        }
+        .chip:hover { border-color: var(--accent-cyan); color: var(--text-secondary); }
+        .chip.active {
+            background: linear-gradient(135deg, rgba(0,240,255,0.15), rgba(184,41,247,0.15));
+            border-color: var(--accent-cyan); color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(0,240,255,0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--gradient-primary); color: #000; border: none;
+            padding: 14px 32px; border-radius: var(--radius-sm);
+            font-size: 0.95rem; font-weight: 700; cursor: pointer;
+            transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,240,255,0.25), 0 0 40px rgba(184,41,247,0.15);
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-success { background: var(--gradient-success); color: #000; }
+        .btn-success:hover { box-shadow: 0 8px 24px rgba(0,255,136,0.25); }
+        .btn-warn { background: var(--gradient-warn); color: #000; }
+        .btn-warn:hover { box-shadow: 0 8px 24px rgba(255,170,0,0.25); }
+        .btn-outline {
+            background: transparent; color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+        }
+        .btn-outline:hover { background: rgba(0,240,255,0.1); }
+
+        .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+
+        /* Progress */
+        .progress-wrap {
+            background: var(--bg-primary); border-radius: 6px;
+            height: 8px; overflow: hidden; margin: 16px 0;
+            border: 1px solid var(--border);
+        }
+        .progress-fill {
+            height: 100%; width: 0%;
+            background: var(--gradient-primary);
+            border-radius: 6px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 12px rgba(0,240,255,0.3);
+        }
+
+        /* Results */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+        }
+        .result-card {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 20px;
+            transition: all 0.3s;
+        }
+        .result-card:hover { border-color: var(--border-hover); }
+        .result-card .card-header {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+            padding-bottom: 12px; border-bottom: 1px solid var(--border);
+        }
+        .result-card .card-header .thumb {
+            width: 48px; height: 48px; border-radius: var(--radius-sm);
+            background: var(--bg-primary); display: flex;
+            align-items: center; justify-content: center; overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .result-card .card-header .thumb svg { max-width: 80%; max-height: 80%; }
+        .result-card .card-header .info { flex: 1; min-width: 0; }
+        .result-card .card-header .name { font-weight: 700; color: var(--text-primary); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .result-card .card-header .source { font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600; }
+        .result-card .field { margin-bottom: 12px; }
+        .result-card .field-label {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted); margin-bottom: 6px; font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .result-card .field-value {
+            background: var(--bg-primary); padding: 10px 14px; border-radius: var(--radius-sm);
+            color: var(--text-primary); font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.85rem; word-break: break-word; border: 1px solid var(--border);
+            line-height: 1.5;
+        }
+        .result-card .keywords { display: flex; flex-wrap: wrap; gap: 6px; }
+        .result-card .keyword-tag {
+            background: linear-gradient(135deg, rgba(0,240,255,0.1), rgba(184,41,247,0.1));
+            border: 1px solid rgba(0,240,255,0.2); color: var(--accent-cyan);
+            padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;
+        }
+
+        /* Meta Preview */
+        .meta-preview {
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 20px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.8rem; color: var(--text-secondary);
+            max-height: 300px; overflow-y: auto; line-height: 1.6;
+            white-space: pre-wrap; word-break: break-all;
+        }
+        .meta-preview .tag { color: var(--accent-cyan); }
+        .meta-preview .attr { color: var(--accent-purple); }
+        .meta-preview .val { color: var(--accent-green); }
+        .meta-preview .comment { color: var(--text-muted); }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px; margin-bottom: 20px;
+        }
+        .stat-box {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 16px; text-align: center;
+        }
+        .stat-box .number {
+            font-size: 2rem; font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-box .label { color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; font-weight: 600; text-transform: uppercase; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px;
+            padding: 16px 28px; border-radius: var(--radius-sm);
+            font-weight: 700; transform: translateY(120px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border: 1px solid;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .toast.show { transform: translateY(0); }
+        .toast-ok { background: rgba(0,255,136,0.15); border-color: rgba(0,255,136,0.3); color: var(--accent-green); }
+        .toast-err { background: rgba(255,45,125,0.15); border-color: rgba(255,45,125,0.3); color: var(--accent-pink); }
+        .toast-warn { background: rgba(255,170,0,0.15); border-color: rgba(255,170,0,0.3); color: var(--accent-orange); }
+        .toast-info { background: rgba(0,240,255,0.15); border-color: rgba(0,240,255,0.3); color: var(--accent-cyan); }
+
+        /* Hidden */
+        .hidden { display: none !important; }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease; }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .pulse { animation: pulse 1.5s infinite; }
+
+        /* Footer */
+        .footer {
+            text-align: center; padding: 30px;
+            color: var(--text-muted); font-size: 0.85rem;
+            border-top: 1px solid var(--border); margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MetaInjector Pro</h1>
+        <p class="subtitle">Professional SVG Metadata Studio — AI Powered with Rule Fallback</p>
+        <div class="badges">
+            <span class="badge badge-cyan">&#129302; Gemini AI</span>
+            <span class="badge badge-purple">&#9881; Auto-Fallback</span>
+            <span class="badge badge-green">&#128229; Batch ZIP Export</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Configuration -->
+        <div class="panel">
+            <div class="panel-title"><span class="icon">&#9881;</span> Configuration</div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="mode-row" style="display:flex;gap:8px;margin-bottom:16px;">
+                        <div class="upload-tab active" data-mode="ai" style="flex:1;">&#129302; AI Mode</div>
+                        <div class="upload-tab" data-mode="rule" style="flex:1;">&#9881; Rule Mode</div>
+                    </div>
+                    <div class="api-box" id="apiBox">
+                        <label>Gemini API Key</label>
+                        <input type="text" id="apiKey" placeholder="AIza... (aistudio.google.com/apikey)" autocomplete="off">
+                        <p style="color:var(--text-muted);font-size:0.8rem;margin-top:8px;">Free tier: 1,500 requests/day. No billing. Key stored in browser only.</p>
+                    </div>
+                    <div class="api-box hidden" id="ruleBox">
+                        <p style="color:var(--text-secondary);font-size:0.9rem;">&#9889; <strong>Rule Mode:</strong> No API needed. Smart filename analysis + keyword database. Works 100% offline, forever.</p>
+                    </div>
+                </div>
+                <div>
+                    <label>Target Platform</label>
+                    <div class="chip-row" id="platformChips">
+                        <span class="chip active" data-platform="shutterstock">Shutterstock</span>
+                        <span class="chip" data-platform="adobe">Adobe</span>
+                        <span class="chip" data-platform="freepik">Freepik</span>
+                        <span class="chip" data-platform="getty">Getty</span>
+                        <span class="chip" data-platform="dreamstime">Dreamstime</span>
+                        <span class="chip" data-platform="alamy">Alamy</span>
+                        <span class="chip" data-platform="vecteezy">Vecteezy</span>
+                        <span class="chip" data-platform="generic">Generic</span>
+                    </div>
+                    <label style="margin-top:12px;">Default Category</label>
+                    <select id="defaultCategory">
+                        <option value="auto">Auto-Detect from Filename</option>
+                        <option value="vector">Vector / Illustration</option>
+                        <option value="icon">Icon / UI</option>
+                        <option value="logo">Logo / Branding</option>
+                        <option value="pattern">Pattern / Background</option>
+                        <option value="infographic">Infographic</option>
+                        <option value="social">Social Media</option>
+                        <option value="floral">Floral / Botanical</option>
+                        <option value="geometric">Geometric</option>
+                        <option value="business">Business</option>
+                        <option value="holiday">Holiday</option>
+                        <option value="watercolor">Watercolor</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="panel">
+            <div class="panel-title"><span class="icon">&#128450;</span> Upload SVG Files</div>
+
+            <div class="upload-tabs">
+                <div class="upload-tab active" data-tab="single">&#128196; Single File</div>
+                <div class="upload-tab" data-tab="batch">&#128230; Batch Upload</div>
+            </div>
+
+            <div class="drop-zone" id="dropZone">
+                <span class="dz-icon">&#128193;</span>
+                <div class="dz-title">Drop SVG files here or click to browse</div>
+                <div class="dz-sub">Supports: .svg files only</div>
+                <input type="file" id="fileInputSingle" accept=".svg">
+                <input type="file" id="fileInputBatch" multiple accept=".svg" class="hidden">
+            </div>
+
+            <div class="progress-wrap hidden" id="progressWrap">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div id="fileGrid" class="file-grid hidden"></div>
+        </div>
+
+        <!-- Editor -->
+        <div class="panel hidden" id="editorPanel">
+            <div class="panel-title"><span class="icon">&#9998;</span> Edit Metadata</div>
+            <div class="grid-3">
+                <div class="field-group">
+                    <label>Title <span class="char-count" id="titleCount">0/200</span></label>
+                    <input type="text" id="titleInput" placeholder="Title...">
+                </div>
+                <div class="field-group">
+                    <label>Category</label>
+                    <select id="categorySelect">
+                        <option value="auto">Auto-Detect</option>
+                        <option value="vector">Vector</option>
+                        <option value="icon">Icon</option>
+                        <option value="logo">Logo</option>
+                        <option value="pattern">Pattern</option>
+                        <option value="infographic">Infographic</option>
+                        <option value="social">Social Media</option>
+                        <option value="floral">Floral</option>
+                        <option value="geometric">Geometric</option>
+                        <option value="business">Business</option>
+                        <option value="holiday">Holiday</option>
+                        <option value="watercolor">Watercolor</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>Extra Keywords</label>
+                    <input type="text" id="extraKeywords" placeholder="minimalist, modern, premium...">
+                </div>
+            </div>
+            <div class="field-group">
+                <label>Description <span class="char-count" id="descCount">0/200</span></label>
+                <textarea id="descInput" placeholder="Description..."></textarea>
+            </div>
+            <div class="field-group">
+                <label>Keywords (comma separated) <span class="char-count" id="keywordCount">0/50</span></label>
+                <textarea id="keywordsInput" placeholder="keyword1, keyword2, keyword3..." style="min-height:60px;"></textarea>
+            </div>
+            <div class="btn-row">
+                <button class="btn" id="regenBtn">&#9889; Regenerate</button>
+                <button class="btn btn-success" id="downloadBtn">&#128229; Download File</button>
+                <button class="btn btn-warn hidden" id="downloadZipBtn">&#128230; Download All as ZIP</button>
+            </div>
+
+            <div class="section-title" style="margin-top:24px;color:var(--accent-cyan);font-weight:700;">XML Metadata Preview</div>
+            <div class="meta-preview" id="metaPreview"></div>
+        </div>
+
+        <!-- Results -->
+        <div class="panel hidden" id="resultsPanel">
+            <div class="panel-title"><span class="icon">&#9989;</span> Results</div>
+            <div class="stats-bar" id="statsBar"></div>
+            <div class="results-grid" id="resultsGrid"></div>
+        </div>
+
+        <div class="footer">
+            MetaInjector Pro &bull; 100% Free &bull; No Server &bull; Your files never leave your browser
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
